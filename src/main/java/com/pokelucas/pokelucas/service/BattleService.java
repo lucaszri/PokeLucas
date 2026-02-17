@@ -1,6 +1,8 @@
 package com.pokelucas.pokelucas.service;
 
 import com.pokelucas.pokelucas.model.BattleModel;
+import com.pokelucas.pokelucas.model.PokemonModel;
+import org.hibernate.Internal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -8,32 +10,43 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class BattleService {
 
-    public ResponseEntity<String> battle() {
+    private static final Random GERADOR = new Random();
+    private static final int MAX_POKEMON_ID = 1350;
 
-        //pokemon 1, 5
+    public PokemonModel invokePokemon() {
+
+        String pokemonUrl = String.valueOf(GERADOR.nextInt(MAX_POKEMON_ID));
 
         RestTemplate restTemplate = new RestTemplate();
-        String fooResourceUrl = "https://pokeapi.co/api/v2/pokemon";
+        String fooResourceUrl = "https://pokeapi.co/api/v2/pokemon/";
 
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + "/1", String.class);
-
+                = restTemplate.getForEntity(fooResourceUrl + pokemonUrl, String.class);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.getBody());
         JsonNode name = root.path("name");
+        int power = GERADOR.nextInt(100);
 
-        return response;
+        PokemonModel pokemon = new PokemonModel(name.toString(), power);
+
+        return pokemon;
     }
 
-    public String  pokemonRandom(Integer pokemon){
-        Random gerador = new Random();
-        pokemon = gerador.nextInt(1200);
+    public BattleModel battleGenerate(PokemonModel pokemon1, PokemonModel pokemon2) {
+        String vencedor = pokemon1.getPower() > pokemon2.getPower() ? pokemon1.getName() :
+                pokemon2.getPower() > pokemon1.getPower() ? pokemon2.getName() :
+                        "Empate";
 
-        return "/" + pokemon.toString();
+        String result = "A batalha foi vencida por: " + vencedor;
+
+        BattleModel finalBattle = new BattleModel(pokemon1, pokemon2, result);
+
+        return finalBattle;
     }
 
 }

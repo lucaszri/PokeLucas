@@ -15,7 +15,7 @@ import java.util.Random;
 public class BattleService {
 
     private static final Random GERADOR = new Random();
-    private static final int MAX_POKEMON_ID = 1350;
+    private static final int MAX_POKEMON_ID = 1349;
 
     public PokemonModel invokePokemon() {
 
